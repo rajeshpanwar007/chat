@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+    <title id="title">Socket.IO chat</title>
+    <link href="css/app.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<ul id="messages"></ul>
+<form action="">
+    <input id="m" autocomplete="off"/>
+    <button>Send</button>
+</form>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/jquery-1.11.1.js"></script>
+<script>
+
+    var count = 0;
+    var nickname = function () {
+        count++;
+        if (!window.name) {
+            var Name = prompt("Please enter your name");
+            if (Name && Name.trim()) {
+                window.name = Name.trim();
+            } else {
+                if (count == 5) {
+                    window.name = makeid();
+                }
+                return nickname();
+            }
+        }
+        document.getElementById('title').innerHTML = window.name;
+        var socket = io();
+        $('form').submit(function () {
+            socket.emit('chat message', window.name + " : " + $('#m').val());
+            $('#m').val('');
+            return false;
+        });
+        socket.on('chat message', function (msg) {
+            $('#messages').append($('<li>').text(msg));
+        });
+    }
+    function makeid() {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        for (var i = 0; i < 5; i++)
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        return text;
+    }
+    $(document).ready(function () {
+        nickname();
+        $(window).bind('reload', function () {
+            window.name = '';
+            nickname();
+        })
+    })
+
+</script>
+
+</body>
+</html>
